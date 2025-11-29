@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Subscription from "@/lib/models/Subscription";
+import { validateApiKey } from "@/lib/api-auth";
 
 // PUT /api/subscriptions/[id] - Update subscription
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = validateApiKey(request);
+  if (authError) return authError;
+
   try {
     await connectDB();
     const { id } = await params;
@@ -51,6 +55,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = validateApiKey(request);
+  if (authError) return authError;
+
   try {
     await connectDB();
     const { id } = await params;

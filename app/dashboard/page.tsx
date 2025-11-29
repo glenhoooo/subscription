@@ -85,7 +85,20 @@ export default function DashboardPage() {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch("/api/subscriptions");
+      const authKey = localStorage.getItem("authKey");
+      const res = await fetch("/api/subscriptions", {
+        headers: {
+          "X-API-Key": authKey || "",
+        },
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("authKey");
+        router.push("/auth");
+        return;
+      }
+
       const result = await res.json();
       if (result.success) {
         setSubscriptions(result.data);
@@ -100,7 +113,20 @@ export default function DashboardPage() {
   const fetchExchangeRates = async () => {
     try {
       setRatesLoading(true);
-      const res = await fetch("/api/exchange-rates");
+      const authKey = localStorage.getItem("authKey");
+      const res = await fetch("/api/exchange-rates", {
+        headers: {
+          "X-API-Key": authKey || "",
+        },
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("authKey");
+        router.push("/auth");
+        return;
+      }
+
       const result = await res.json();
       if (result.success) {
         setExchangeRates(result.rates);
@@ -129,15 +155,26 @@ export default function DashboardPage() {
         ? `/api/subscriptions/${editingSubscription._id}`
         : "/api/subscriptions";
       const method = editingSubscription ? "PUT" : "POST";
+      const authKey = localStorage.getItem("authKey");
 
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": authKey || "",
+        },
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
         }),
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("authKey");
+        router.push("/auth");
+        return;
+      }
 
       const result = await res.json();
       if (result.success) {
@@ -157,7 +194,21 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
+      const authKey = localStorage.getItem("authKey");
+      const res = await fetch(`/api/subscriptions/${id}`, {
+        method: "DELETE",
+        headers: {
+          "X-API-Key": authKey || "",
+        },
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("authKey");
+        router.push("/auth");
+        return;
+      }
+
       const result = await res.json();
       if (result.success) {
         fetchSubscriptions();

@@ -33,6 +33,7 @@ export default function AuthPage() {
     if (key === configuredKey) {
       // Successful authentication
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("authKey", key);
       router.push("/dashboard");
     } else {
       // Invalid key

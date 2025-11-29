@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Subscription from "@/lib/models/Subscription";
+import { validateApiKey } from "@/lib/api-auth";
 
 // GET /api/subscriptions - List all subscriptions
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = validateApiKey(request);
+  if (authError) return authError;
+
   try {
     await connectDB();
     const subscriptions = await Subscription.find({}).sort({ createdAt: -1 });
@@ -28,6 +32,9 @@ export async function GET() {
 
 // POST /api/subscriptions - Create new subscription
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request);
+  if (authError) return authError;
+
   try {
     await connectDB();
     const body = await request.json();
