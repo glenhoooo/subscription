@@ -61,9 +61,11 @@ export default function DashboardPage() {
       if (isAuthenticated !== "true") {
         router.push("/auth");
       } else {
-        setIsLoading(false);
-        fetchSubscriptions();
-        fetchExchangeRates();
+        Promise.all([fetchSubscriptions(), fetchExchangeRates()]).finally(
+          () => {
+            setIsLoading(false);
+          },
+        );
       }
     }
   }, [router]);
@@ -77,7 +79,7 @@ export default function DashboardPage() {
       const filtered = subscriptions.filter(
         (sub) =>
           sub.name.toLowerCase().includes(query) ||
-          sub.renewalCycle.toLowerCase().includes(query)
+          sub.renewalCycle.toLowerCase().includes(query),
       );
       setFilteredSubscriptions(filtered);
     }
@@ -299,7 +301,7 @@ export default function DashboardPage() {
         subscription.price,
         subscription.currency,
         subscription.renewalCycle,
-        exchangeRates
+        exchangeRates,
       );
       return `¥${monthlyCNY.toFixed(2)}`;
     } catch {
@@ -318,7 +320,7 @@ export default function DashboardPage() {
           subscription.price,
           subscription.currency,
           subscription.renewalCycle,
-          exchangeRates
+          exchangeRates,
         );
         // Convert monthly to annual by multiplying by 12
         return total + monthlyCNY * 12;
@@ -351,7 +353,12 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-300">加载中...</div>
+        <div className="flex flex-col items-center gap-3">
+          <Icons.Loader2 className="h-8 w-8 animate-spin text-gray-600 dark:text-gray-300" />
+          <div className="text-gray-600 dark:text-gray-300 font-medium">
+            加载中...
+          </div>
+        </div>
       </div>
     );
   }
@@ -440,7 +447,7 @@ export default function DashboardPage() {
                 <tbody className="bg-white dark:bg-gray-950 divide-y divide-gray-200 dark:divide-gray-800">
                   {filteredSubscriptions.map((subscription) => {
                     const remaining = getRemainingTime(
-                      subscription.nextRenewalDate
+                      subscription.nextRenewalDate,
                     );
                     return (
                       <tr key={subscription._id}>
